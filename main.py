@@ -5,7 +5,7 @@ from typing import List, Optional
 from dotenv import load_dotenv
 import os, json
 import numpy as np
-
+import openai  # SDK legacy estable
 from alignment import split_claims, split_charter_articles
 
 load_dotenv()
@@ -14,7 +14,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 EMBED_MODEL = os.getenv("EMBED_MODEL", "text-embedding-3-small")
 DEFAULT_THRESHOLD = float(os.getenv("DEFAULT_THRESHOLD", "0.60"))
 
-OpenAI(api_key=OPENAI_API_KEY) if OPENAI_API_KEY else None
+openai.api_key = OPENAI_API_KEY
 
 CORPUS_PATH = os.getenv("CORPUS_PATH", "./storage/corpus.json")
 
@@ -64,12 +64,11 @@ def _save_corpus(data):
     with open(CORPUS_PATH, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False)
 
-    def _embed(texts: List[str]):
+def _embed(texts: List[str]):
     if not OPENAI_API_KEY:
         raise HTTPException(status_code=500, detail="OPENAI_API_KEY no configurado.")
     resp = openai.Embedding.create(model=EMBED_MODEL, input=texts)
     return [item["embedding"] for item in resp["data"]]
-
 
 @app.get("/health")
 def health():
@@ -106,6 +105,7 @@ def evaluate(req: EvaluateRequest):
     if not claims:
         return EvaluateResponse(porcentaje_alineacion=0.0,total_claims=0,total_alineados=0,detalle=[])
 
+    # Embeddings de claims
     claim_embs = _embed(claims)
 
     detalle = []
