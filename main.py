@@ -5,7 +5,7 @@ from typing import List, Optional
 from dotenv import load_dotenv
 import os, json
 import numpy as np
-from openai import OpenAI
+
 from alignment import split_claims, split_charter_articles
 
 load_dotenv()
@@ -64,11 +64,12 @@ def _save_corpus(data):
     with open(CORPUS_PATH, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False)
 
-def _embed(texts: List[str]):
-    if client is None:
+    def _embed(texts: List[str]):
+    if not OPENAI_API_KEY:
         raise HTTPException(status_code=500, detail="OPENAI_API_KEY no configurado.")
-    resp = client.embeddings.create(model=EMBED_MODEL, input=texts)
-    return [d.embedding for d in resp.data]
+    resp = openai.Embedding.create(model=EMBED_MODEL, input=texts)
+    return [item["embedding"] for item in resp["data"]]
+
 
 @app.get("/health")
 def health():
