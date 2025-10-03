@@ -14,7 +14,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 EMBED_MODEL = os.getenv("EMBED_MODEL", "text-embedding-3-small")
 DEFAULT_THRESHOLD = float(os.getenv("DEFAULT_THRESHOLD", "0.60"))
 
-client = OpenAI(api_key=OPENAI_API_KEY) if OPENAI_API_KEY else None
+OpenAI(api_key=OPENAI_API_KEY) if OPENAI_API_KEY else None
 
 CORPUS_PATH = os.getenv("CORPUS_PATH", "./storage/corpus.json")
 
